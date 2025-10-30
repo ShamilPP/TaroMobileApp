@@ -1,0 +1,16 @@
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeNotificationStateChanged"
+    android:accessibilityFlags="flagDefault|flagIncludeNotImportantViews|flagReportViewIds|flagRequestEnhancedWebAccessibility"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:notificationTimeout="100"
+    android:canRetrieveWindowContent="true"
+    android:canRequestTouchExplorationMode="false"
+    android:canRequestFilterKeyEvents="true" />
+
+<!-- Add this to res/values/strings.xml -->
+<!--
+<string name="accessibility_service_description">
+    Detects volume button holds during calls to show lead information overlay. 
+    This service helps real estate agents quickly access client information during phone calls.
+</string>
+-->
