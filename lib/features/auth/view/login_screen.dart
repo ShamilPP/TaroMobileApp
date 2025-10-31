@@ -257,7 +257,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ).showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              "Verification failed: ${e.message}",
+                                              "Verification failed: ${e.toString()}",
                                             ),
                                             backgroundColor:
                                                 Colors.red.shade700,

@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class UserModel {
   final String uid;
@@ -91,7 +90,6 @@ factory UserModel.minimal(
 }
 
 class UserRepository {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   
@@ -182,16 +180,5 @@ class UserRepository {
     }
   }
 
-  
-UserModel? getCurrentUserModel(User? firebaseUser, {String firstName = '', String lastName = ''}) {
-  if (firebaseUser == null) return null;
-
-  return UserModel.minimal(
-    firebaseUser.uid,
-    firebaseUser.phoneNumber ?? '',
-    firstName: firstName,
-    lastName: lastName,
-  );
-}
 
 }

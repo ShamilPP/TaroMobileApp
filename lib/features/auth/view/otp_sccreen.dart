@@ -251,7 +251,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                         ).showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              "Error resending OTP: ${e.message}",
+                                              "Error resending OTP: ${e.toString()}",
                                             ),
                                             backgroundColor:
                                                 Colors.red.shade700,
@@ -310,17 +310,15 @@ class _OtpScreenState extends State<OtpScreen> {
                                       await authProvider.verifyOTP(currentText);
                                       final phoneNumber = widget.phoneNumber;
 
-                                      
-                                      final userExists = await authProvider
-                                          .userExistsByPhone(phoneNumber);
-
-                                      if (userExists) {
-                                        await authProvider.refreshUserData();
-                                        _navigateToHomeScreen();
-                                      } else {
+                                      // Check if user needs to complete registration
+                                      // Backend user is already created, but might need profile completion
+                                      if (authProvider.needsRegistration) {
                                         _navigateToRegistrationScreen(
                                           phoneNumber,
                                         );
+                                      } else {
+                                        await authProvider.refreshUserData();
+                                        _navigateToHomeScreen();
                                       }
                                     } catch (e) {
                                       setState(() {
