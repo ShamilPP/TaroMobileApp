@@ -1,13 +1,32 @@
 {
   "project_info": {
-    "project_number": "99031267729",
-    "project_id": "taro-mobile-app",
-    "storage_bucket": "taro-mobile-app.firebasestorage.app"
+    "project_number": "1021892798345",
+    "project_id": "taro-733f3",
+    "storage_bucket": "taro-733f3.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:99031267729:android:fb5f4f993e7a4c33560230",
+        "mobilesdk_app_id": "1:1021892798345:android:3dcf5b7d6962fadfb56358",
+        "android_client_info": {
+          "package_name": "com.taro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPCKCwZ5jl4BeAv6rLglx2Dj0NYEtkgY8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1021892798345:android:4e4d0b83099e6ab5b56358",
         "android_client_info": {
           "package_name": "com.taro.mobileapp"
         }
@@ -15,7 +34,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC0sCTFf2p-EQeX8df_32MOsgeOEKqME-s"
+          "current_key": "AIzaSyCPCKCwZ5jl4BeAv6rLglx2Dj0NYEtkgY8"
         }
       ],
       "services": {

@@ -1,54 +1,319 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ApiService {
-  static const String baseUrl = 'https://identitytoolkit.googleapis.com/v1';
-  static const String apiKey = 'AIzaSyCPCKCwZ5jl4BeAv6rLglx2Dj0NYEtkgY8';
+  static const String baseUrl = 'https://taro-backend-2o4k.onrender.com';
+  static const String apiVersion = 'v1';
 
   static ApiService? _instance;
   static ApiService get instance => _instance ??= ApiService._();
 
   ApiService._();
 
-  Map<String, String> get _headers => {'Content-Type': 'application/json', 'Accept': 'application/json'};
-
-  Future<ApiResponse<T>> post<T>(String endpoint, Map<String, dynamic> body, {Map<String, String>? headers, T Function(Map<String, dynamic>)? parser}) async {
+  Future<String?> _getAuthToken() async {
     try {
-      final uri = Uri.parse('$baseUrl$endpoint?key=$apiKey');
-      final response = await http.post(uri, headers: {..._headers, ...?headers}, body: json.encode(body));
+      final User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Get fresh ID token from Firebase Auth
+        return await user.getIdToken();
+      }
+      return null;
+    } catch (e) {
+      print('Error getting auth token: $e');
+      return null;
+    }
+  }
+
+  Map<String, String> _getHeaders() {
+    final headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    return headers;
+  }
+
+  Future<Map<String, String>> _getHeadersWithAuth() async {
+    final headers = _getHeaders();
+    final token = await _getAuthToken();
+    if (token != null) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+    return headers;
+  }
+
+  Future<ApiResponse<T>> post<T>(
+    String endpoint,
+    Map<String, dynamic>? body, {
+    bool requiresAuth = false,
+    T Function(Map<String, dynamic>)? parser,
+  }) async {
+    try {
+      final uri = Uri.parse('$baseUrl/$apiVersion$endpoint');
+      
+      final headers = requiresAuth 
+          ? await _getHeadersWithAuth()
+          : _getHeaders();
+
+      final response = await http.post(
+        uri,
+        headers: headers,
+        body: body != null ? json.encode(body) : null,
+      );
 
       final responseData = json.decode(response.body) as Map<String, dynamic>;
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        return ApiResponse<T>(success: true, data: parser != null ? parser(responseData) : responseData as T, statusCode: response.statusCode);
+        // Check if response has standard format
+        if (responseData.containsKey('status') && responseData.containsKey('data')) {
+          final status = responseData['status'] as bool;
+          if (status) {
+            return ApiResponse<T>(
+              success: true,
+              data: parser != null 
+                  ? parser(responseData['data'] as Map<String, dynamic>)
+                  : responseData['data'] as T,
+              statusCode: response.statusCode,
+              message: responseData['message'] as String?,
+              code: responseData['code'] as String?,
+            );
+          } else {
+            return ApiResponse<T>(
+              success: false,
+              error: responseData['message'] as String? ?? 'An error occurred',
+              errorCode: responseData['code'] as String?,
+              statusCode: response.statusCode,
+            );
+          }
+        } else {
+          // Direct data response
+          return ApiResponse<T>(
+            success: true,
+            data: parser != null ? parser(responseData) : responseData as T,
+            statusCode: response.statusCode,
+          );
+        }
       } else {
         final error = responseData['error'] as Map<String, dynamic>?;
-        return ApiResponse<T>(success: false, error: error?['message'] ?? 'An error occurred', errorCode: error?['code']?.toString(), statusCode: response.statusCode);
+        return ApiResponse<T>(
+          success: false,
+          error: responseData['message'] as String? ?? error?['message'] ?? 'An error occurred',
+          errorCode: responseData['code'] as String? ?? error?['code']?.toString(),
+          statusCode: response.statusCode,
+        );
       }
     } catch (e) {
-      return ApiResponse<T>(success: false, error: 'Network error: ${e.toString()}', statusCode: 0);
+      return ApiResponse<T>(
+        success: false,
+        error: 'Network error: ${e.toString()}',
+        statusCode: 0,
+      );
     }
   }
 
-  Future<ApiResponse<T>> get<T>(String endpoint, {Map<String, String>? queryParams, Map<String, String>? headers, T Function(Map<String, dynamic>)? parser}) async {
+  Future<ApiResponse<T>> get<T>(
+    String endpoint, {
+    Map<String, String>? queryParams,
+    bool requiresAuth = false,
+    T Function(Map<String, dynamic>)? parser,
+  }) async {
     try {
-      var uri = Uri.parse('$baseUrl$endpoint?key=$apiKey');
+      var uri = Uri.parse('$baseUrl/$apiVersion$endpoint');
       if (queryParams != null && queryParams.isNotEmpty) {
         uri = uri.replace(queryParameters: queryParams);
       }
 
-      final response = await http.get(uri, headers: {..._headers, ...?headers});
+      final headers = requiresAuth 
+          ? await _getHeadersWithAuth()
+          : _getHeaders();
+
+      final response = await http.get(
+        uri,
+        headers: headers,
+      );
 
       final responseData = json.decode(response.body) as Map<String, dynamic>;
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        return ApiResponse<T>(success: true, data: parser != null ? parser(responseData) : responseData as T, statusCode: response.statusCode);
+        // Check if response has standard format
+        if (responseData.containsKey('status') && responseData.containsKey('data')) {
+          final status = responseData['status'] as bool;
+          if (status) {
+            return ApiResponse<T>(
+              success: true,
+              data: parser != null 
+                  ? parser(responseData['data'] as Map<String, dynamic>)
+                  : responseData['data'] as T,
+              statusCode: response.statusCode,
+              message: responseData['message'] as String?,
+              code: responseData['code'] as String?,
+            );
+          } else {
+            return ApiResponse<T>(
+              success: false,
+              error: responseData['message'] as String? ?? 'An error occurred',
+              errorCode: responseData['code'] as String?,
+              statusCode: response.statusCode,
+            );
+          }
+        } else {
+          // Direct data response
+          return ApiResponse<T>(
+            success: true,
+            data: parser != null ? parser(responseData) : responseData as T,
+            statusCode: response.statusCode,
+          );
+        }
       } else {
         final error = responseData['error'] as Map<String, dynamic>?;
-        return ApiResponse<T>(success: false, error: error?['message'] ?? 'An error occurred', errorCode: error?['code']?.toString(), statusCode: response.statusCode);
+        return ApiResponse<T>(
+          success: false,
+          error: responseData['message'] as String? ?? error?['message'] ?? 'An error occurred',
+          errorCode: responseData['code'] as String? ?? error?['code']?.toString(),
+          statusCode: response.statusCode,
+        );
       }
     } catch (e) {
-      return ApiResponse<T>(success: false, error: 'Network error: ${e.toString()}', statusCode: 0);
+      return ApiResponse<T>(
+        success: false,
+        error: 'Network error: ${e.toString()}',
+        statusCode: 0,
+      );
+    }
+  }
+
+  Future<ApiResponse<T>> put<T>(
+    String endpoint,
+    Map<String, dynamic>? body, {
+    bool requiresAuth = false,
+    T Function(Map<String, dynamic>)? parser,
+  }) async {
+    try {
+      final uri = Uri.parse('$baseUrl/$apiVersion$endpoint');
+      
+      final headers = requiresAuth 
+          ? await _getHeadersWithAuth()
+          : _getHeaders();
+
+      final response = await http.put(
+        uri,
+        headers: headers,
+        body: body != null ? json.encode(body) : null,
+      );
+
+      final responseData = json.decode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (responseData.containsKey('status') && responseData.containsKey('data')) {
+          final status = responseData['status'] as bool;
+          if (status) {
+            return ApiResponse<T>(
+              success: true,
+              data: parser != null 
+                  ? parser(responseData['data'] as Map<String, dynamic>)
+                  : responseData['data'] as T,
+              statusCode: response.statusCode,
+              message: responseData['message'] as String?,
+              code: responseData['code'] as String?,
+            );
+          } else {
+            return ApiResponse<T>(
+              success: false,
+              error: responseData['message'] as String? ?? 'An error occurred',
+              errorCode: responseData['code'] as String?,
+              statusCode: response.statusCode,
+            );
+          }
+        } else {
+          return ApiResponse<T>(
+            success: true,
+            data: parser != null ? parser(responseData) : responseData as T,
+            statusCode: response.statusCode,
+          );
+        }
+      } else {
+        final error = responseData['error'] as Map<String, dynamic>?;
+        return ApiResponse<T>(
+          success: false,
+          error: responseData['message'] as String? ?? error?['message'] ?? 'An error occurred',
+          errorCode: responseData['code'] as String? ?? error?['code']?.toString(),
+          statusCode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      return ApiResponse<T>(
+        success: false,
+        error: 'Network error: ${e.toString()}',
+        statusCode: 0,
+      );
+    }
+  }
+
+  Future<ApiResponse<T>> delete<T>(
+    String endpoint,
+    Map<String, dynamic>? body, {
+    bool requiresAuth = false,
+    T Function(Map<String, dynamic>)? parser,
+  }) async {
+    try {
+      final uri = Uri.parse('$baseUrl/$apiVersion$endpoint');
+      
+      final headers = requiresAuth 
+          ? await _getHeadersWithAuth()
+          : _getHeaders();
+
+      final response = await http.delete(
+        uri,
+        headers: headers,
+        body: body != null ? json.encode(body) : null,
+      );
+
+      final responseData = json.decode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (responseData.containsKey('status') && responseData.containsKey('data')) {
+          final status = responseData['status'] as bool;
+          if (status) {
+            final data = responseData['data'];
+            return ApiResponse<T>(
+              success: true,
+              data: data != null && parser != null
+                  ? parser(data as Map<String, dynamic>)
+                  : (data != null ? data as T : null),
+              statusCode: response.statusCode,
+              message: responseData['message'] as String?,
+              code: responseData['code'] as String?,
+            );
+          } else {
+            return ApiResponse<T>(
+              success: false,
+              error: responseData['message'] as String? ?? 'An error occurred',
+              errorCode: responseData['code'] as String?,
+              statusCode: response.statusCode,
+            );
+          }
+        } else {
+          return ApiResponse<T>(
+            success: true,
+            data: parser != null ? parser(responseData) : responseData as T,
+            statusCode: response.statusCode,
+          );
+        }
+      } else {
+        final error = responseData['error'] as Map<String, dynamic>?;
+        return ApiResponse<T>(
+          success: false,
+          error: responseData['message'] as String? ?? error?['message'] ?? 'An error occurred',
+          errorCode: responseData['code'] as String? ?? error?['code']?.toString(),
+          statusCode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      return ApiResponse<T>(
+        success: false,
+        error: 'Network error: ${e.toString()}',
+        statusCode: 0,
+      );
     }
   }
 }
@@ -58,10 +323,21 @@ class ApiResponse<T> {
   final T? data;
   final String? error;
   final String? errorCode;
+  final String? message;
+  final String? code;
   final int statusCode;
 
-  ApiResponse({required this.success, this.data, this.error, this.errorCode, required this.statusCode});
+  ApiResponse({
+    required this.success,
+    this.data,
+    this.error,
+    this.errorCode,
+    this.message,
+    this.code,
+    required this.statusCode,
+  });
 
   bool get isSuccess => success;
   bool get isError => !success;
 }
+
