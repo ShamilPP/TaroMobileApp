@@ -1,8 +1,8 @@
-import 'package:taro_mobile/core/services/backend_api_service.dart';
+import 'package:taro_mobile/core/services/api_service.dart';
 import 'package:taro_mobile/core/models/api_models.dart';
 
 class OrganizationRepository {
-  final BackendApiService _apiService = BackendApiService.instance;
+  final ApiService _apiService = ApiService.instance;
 
   Future<PaginatedResponse<OrganizationInviteModel>> getMyInvitations({
     int page = 1,

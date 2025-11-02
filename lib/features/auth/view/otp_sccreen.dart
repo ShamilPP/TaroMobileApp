@@ -6,6 +6,7 @@ import 'package:taro_mobile/core/constants/colors.dart';
 import 'package:taro_mobile/features/home/view/home_sreen.dart';
 import 'package:taro_mobile/features/auth/controller/auth_provider.dart';
 import 'package:taro_mobile/features/auth/view/registration_page.dart';
+import 'package:taro_mobile/splash_screen.dart';
 
 class OtpScreen extends StatefulWidget {
   final String phoneNumber;
@@ -310,6 +311,9 @@ class _OtpScreenState extends State<OtpScreen> {
                                       await authProvider.verifyOTP(currentText);
                                       final phoneNumber = widget.phoneNumber;
 
+                                      // Wait a moment to ensure user data is fully synced
+                                      await Future.delayed(Duration(milliseconds: 100));
+                                      
                                       // Check if user needs to complete registration
                                       // Backend user is already created, but might need profile completion
                                       if (authProvider.needsRegistration) {
@@ -317,7 +321,10 @@ class _OtpScreenState extends State<OtpScreen> {
                                           phoneNumber,
                                         );
                                       } else {
+                                        // Ensure user data is refreshed before navigation
                                         await authProvider.refreshUserData();
+                                        // Navigate to home screen after successful login
+                                        // Alternative: Use _navigateToSplashScreen() to let splash handle routing
                                         _navigateToHomeScreen();
                                       }
                                     } catch (e) {
@@ -379,9 +386,21 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 
   void _navigateToHomeScreen() {
+    // Navigate directly to home screen
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => HomeScreen()),
+      (route) => false,
+    );
+  }
+
+  // Alternative navigation method - navigate to splash screen which will check auth and route accordingly
+  // To use this instead of _navigateToHomeScreen(), replace the call in the verify OTP handler
+  // ignore: unused_element
+  void _navigateToSplashScreen() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => SplashScreen()),
       (route) => false,
     );
   }

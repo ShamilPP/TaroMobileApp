@@ -45,8 +45,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
       
       if (authProvider.isLoggedIn) {
-        print("Error checking auth state:");
-
+        // User is logged in, navigate to home screen
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );

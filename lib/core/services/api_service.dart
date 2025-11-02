@@ -26,10 +26,7 @@ class ApiService {
   }
 
   Map<String, String> _getHeaders() {
-    final headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
+    final headers = {'Content-Type': 'application/json', 'Accept': 'application/json'};
     return headers;
   }
 
@@ -42,25 +39,16 @@ class ApiService {
     return headers;
   }
 
-  Future<ApiResponse<T>> post<T>(
-    String endpoint,
-    Map<String, dynamic>? body, {
-    bool requiresAuth = false,
-    T Function(Map<String, dynamic>)? parser,
-  }) async {
+  Future<ApiResponse<T>> post<T>(String endpoint, Map<String, dynamic>? body, {bool requiresAuth = false, T Function(Map<String, dynamic>)? parser}) async {
     try {
       final uri = Uri.parse('$baseUrl/$apiVersion$endpoint');
-      
-      final headers = requiresAuth 
-          ? await _getHeadersWithAuth()
-          : _getHeaders();
+      print('POST $endpoint');
 
-      final response = await http.post(
-        uri,
-        headers: headers,
-        body: body != null ? json.encode(body) : null,
-      );
+      final headers = requiresAuth ? await _getHeadersWithAuth() : _getHeaders();
 
+      final response = await http.post(uri, headers: headers, body: body != null ? json.encode(body) : null);
+
+      print('POST $endpoint -> ${response.statusCode}');
       final responseData = json.decode(response.body) as Map<String, dynamic>;
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -70,9 +58,7 @@ class ApiService {
           if (status) {
             return ApiResponse<T>(
               success: true,
-              data: parser != null 
-                  ? parser(responseData['data'] as Map<String, dynamic>)
-                  : responseData['data'] as T,
+              data: parser != null ? parser(responseData['data'] as Map<String, dynamic>) : responseData['data'] as T,
               statusCode: response.statusCode,
               message: responseData['message'] as String?,
               code: responseData['code'] as String?,
@@ -87,11 +73,7 @@ class ApiService {
           }
         } else {
           // Direct data response
-          return ApiResponse<T>(
-            success: true,
-            data: parser != null ? parser(responseData) : responseData as T,
-            statusCode: response.statusCode,
-          );
+          return ApiResponse<T>(success: true, data: parser != null ? parser(responseData) : responseData as T, statusCode: response.statusCode);
         }
       } else {
         final error = responseData['error'] as Map<String, dynamic>?;
@@ -103,35 +85,24 @@ class ApiService {
         );
       }
     } catch (e) {
-      return ApiResponse<T>(
-        success: false,
-        error: 'Network error: ${e.toString()}',
-        statusCode: 0,
-      );
+      print('POST $endpoint -> ERROR: $e');
+      return ApiResponse<T>(success: false, error: 'Network error: ${e.toString()}', statusCode: 0);
     }
   }
 
-  Future<ApiResponse<T>> get<T>(
-    String endpoint, {
-    Map<String, String>? queryParams,
-    bool requiresAuth = false,
-    T Function(Map<String, dynamic>)? parser,
-  }) async {
+  Future<ApiResponse<T>> get<T>(String endpoint, {Map<String, String>? queryParams, bool requiresAuth = false, T Function(Map<String, dynamic>)? parser}) async {
     try {
       var uri = Uri.parse('$baseUrl/$apiVersion$endpoint');
       if (queryParams != null && queryParams.isNotEmpty) {
         uri = uri.replace(queryParameters: queryParams);
       }
+      print('GET $endpoint');
 
-      final headers = requiresAuth 
-          ? await _getHeadersWithAuth()
-          : _getHeaders();
+      final headers = requiresAuth ? await _getHeadersWithAuth() : _getHeaders();
 
-      final response = await http.get(
-        uri,
-        headers: headers,
-      );
+      final response = await http.get(uri, headers: headers);
 
+      print('GET $endpoint -> ${response.statusCode}');
       final responseData = json.decode(response.body) as Map<String, dynamic>;
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -141,9 +112,7 @@ class ApiService {
           if (status) {
             return ApiResponse<T>(
               success: true,
-              data: parser != null 
-                  ? parser(responseData['data'] as Map<String, dynamic>)
-                  : responseData['data'] as T,
+              data: parser != null ? parser(responseData['data'] as Map<String, dynamic>) : responseData['data'] as T,
               statusCode: response.statusCode,
               message: responseData['message'] as String?,
               code: responseData['code'] as String?,
@@ -158,11 +127,7 @@ class ApiService {
           }
         } else {
           // Direct data response
-          return ApiResponse<T>(
-            success: true,
-            data: parser != null ? parser(responseData) : responseData as T,
-            statusCode: response.statusCode,
-          );
+          return ApiResponse<T>(success: true, data: parser != null ? parser(responseData) : responseData as T, statusCode: response.statusCode);
         }
       } else {
         final error = responseData['error'] as Map<String, dynamic>?;
@@ -174,33 +139,21 @@ class ApiService {
         );
       }
     } catch (e) {
-      return ApiResponse<T>(
-        success: false,
-        error: 'Network error: ${e.toString()}',
-        statusCode: 0,
-      );
+      print('GET $endpoint -> ERROR: $e');
+      return ApiResponse<T>(success: false, error: 'Network error: ${e.toString()}', statusCode: 0);
     }
   }
 
-  Future<ApiResponse<T>> put<T>(
-    String endpoint,
-    Map<String, dynamic>? body, {
-    bool requiresAuth = false,
-    T Function(Map<String, dynamic>)? parser,
-  }) async {
+  Future<ApiResponse<T>> put<T>(String endpoint, Map<String, dynamic>? body, {bool requiresAuth = false, T Function(Map<String, dynamic>)? parser}) async {
     try {
       final uri = Uri.parse('$baseUrl/$apiVersion$endpoint');
-      
-      final headers = requiresAuth 
-          ? await _getHeadersWithAuth()
-          : _getHeaders();
+      print('PUT $endpoint');
 
-      final response = await http.put(
-        uri,
-        headers: headers,
-        body: body != null ? json.encode(body) : null,
-      );
+      final headers = requiresAuth ? await _getHeadersWithAuth() : _getHeaders();
 
+      final response = await http.put(uri, headers: headers, body: body != null ? json.encode(body) : null);
+
+      print('PUT $endpoint -> ${response.statusCode}');
       final responseData = json.decode(response.body) as Map<String, dynamic>;
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -209,9 +162,7 @@ class ApiService {
           if (status) {
             return ApiResponse<T>(
               success: true,
-              data: parser != null 
-                  ? parser(responseData['data'] as Map<String, dynamic>)
-                  : responseData['data'] as T,
+              data: parser != null ? parser(responseData['data'] as Map<String, dynamic>) : responseData['data'] as T,
               statusCode: response.statusCode,
               message: responseData['message'] as String?,
               code: responseData['code'] as String?,
@@ -225,11 +176,7 @@ class ApiService {
             );
           }
         } else {
-          return ApiResponse<T>(
-            success: true,
-            data: parser != null ? parser(responseData) : responseData as T,
-            statusCode: response.statusCode,
-          );
+          return ApiResponse<T>(success: true, data: parser != null ? parser(responseData) : responseData as T, statusCode: response.statusCode);
         }
       } else {
         final error = responseData['error'] as Map<String, dynamic>?;
@@ -241,33 +188,21 @@ class ApiService {
         );
       }
     } catch (e) {
-      return ApiResponse<T>(
-        success: false,
-        error: 'Network error: ${e.toString()}',
-        statusCode: 0,
-      );
+      print('PUT $endpoint -> ERROR: $e');
+      return ApiResponse<T>(success: false, error: 'Network error: ${e.toString()}', statusCode: 0);
     }
   }
 
-  Future<ApiResponse<T>> delete<T>(
-    String endpoint,
-    Map<String, dynamic>? body, {
-    bool requiresAuth = false,
-    T Function(Map<String, dynamic>)? parser,
-  }) async {
+  Future<ApiResponse<T>> delete<T>(String endpoint, Map<String, dynamic>? body, {bool requiresAuth = false, T Function(Map<String, dynamic>)? parser}) async {
     try {
       final uri = Uri.parse('$baseUrl/$apiVersion$endpoint');
-      
-      final headers = requiresAuth 
-          ? await _getHeadersWithAuth()
-          : _getHeaders();
+      print('DELETE $endpoint');
 
-      final response = await http.delete(
-        uri,
-        headers: headers,
-        body: body != null ? json.encode(body) : null,
-      );
+      final headers = requiresAuth ? await _getHeadersWithAuth() : _getHeaders();
 
+      final response = await http.delete(uri, headers: headers, body: body != null ? json.encode(body) : null);
+
+      print('DELETE $endpoint -> ${response.statusCode}');
       final responseData = json.decode(response.body) as Map<String, dynamic>;
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -277,9 +212,7 @@ class ApiService {
             final data = responseData['data'];
             return ApiResponse<T>(
               success: true,
-              data: data != null && parser != null
-                  ? parser(data as Map<String, dynamic>)
-                  : (data != null ? data as T : null),
+              data: data != null && parser != null ? parser(data as Map<String, dynamic>) : (data != null ? data as T : null),
               statusCode: response.statusCode,
               message: responseData['message'] as String?,
               code: responseData['code'] as String?,
@@ -293,11 +226,7 @@ class ApiService {
             );
           }
         } else {
-          return ApiResponse<T>(
-            success: true,
-            data: parser != null ? parser(responseData) : responseData as T,
-            statusCode: response.statusCode,
-          );
+          return ApiResponse<T>(success: true, data: parser != null ? parser(responseData) : responseData as T, statusCode: response.statusCode);
         }
       } else {
         final error = responseData['error'] as Map<String, dynamic>?;
@@ -309,11 +238,8 @@ class ApiService {
         );
       }
     } catch (e) {
-      return ApiResponse<T>(
-        success: false,
-        error: 'Network error: ${e.toString()}',
-        statusCode: 0,
-      );
+      print('DELETE $endpoint -> ERROR: $e');
+      return ApiResponse<T>(success: false, error: 'Network error: ${e.toString()}', statusCode: 0);
     }
   }
 }
@@ -327,17 +253,8 @@ class ApiResponse<T> {
   final String? code;
   final int statusCode;
 
-  ApiResponse({
-    required this.success,
-    this.data,
-    this.error,
-    this.errorCode,
-    this.message,
-    this.code,
-    required this.statusCode,
-  });
+  ApiResponse({required this.success, this.data, this.error, this.errorCode, this.message, this.code, required this.statusCode});
 
   bool get isSuccess => success;
   bool get isError => !success;
 }
-
