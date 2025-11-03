@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:taro_mobile/core/constants/colors.dart';
 import 'package:taro_mobile/features/home/controller/lead_controller.dart';
-import 'package:taro_mobile/features/home/view/home_sreen.dart';
+import 'package:taro_mobile/features/home/view/home_sreen.dart' as nav;
 import 'package:taro_mobile/features/lead/add_lead_controller.dart';
 import 'package:taro_mobile/features/lead/add_lead_model.dart';
 import 'package:taro_mobile/features/lead/location_picker.dart';

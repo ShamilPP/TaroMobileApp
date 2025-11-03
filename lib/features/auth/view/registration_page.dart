@@ -5,7 +5,7 @@ import 'package:taro_mobile/core/constants/colors.dart';
 import 'package:taro_mobile/features/auth/controller/auth_provider.dart';
 import 'package:taro_mobile/features/auth/repository/user_repository.dart';
 import 'package:taro_mobile/features/organization/repository/organization_repository.dart';
-import 'package:taro_mobile/features/home/view/home_sreen.dart';
+import 'package:taro_mobile/features/home/view/home_sreen.dart' as nav;
 
 class RegistrationScreen extends StatefulWidget {
   final String prefillPhoneNumber;
@@ -309,7 +309,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   void _goToHome() {
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      MaterialPageRoute(builder: (_) => const nav.MainNavigationScreen()),
           (route) => false,
     );
   }

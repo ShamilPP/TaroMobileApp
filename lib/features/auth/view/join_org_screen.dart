@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:taro_mobile/core/constants/colors.dart';
-import 'package:taro_mobile/features/home/view/home_sreen.dart';
 import 'package:taro_mobile/features/auth/controller/auth_provider.dart';
+
+import '../../home/view/home_screen.dart';
 
 class JoinOrganizationScreen extends StatefulWidget {
   final String phoneNumber;

@@ -6,7 +6,7 @@ import 'package:taro_mobile/core/constants/colors.dart';
 import 'package:taro_mobile/core/constants/image_constants.dart';
 import 'package:taro_mobile/features/auth/controller/auth_provider.dart';
 import 'package:taro_mobile/features/auth/view/login_screen.dart';
-import 'package:taro_mobile/features/home/view/home_sreen.dart';
+import 'package:taro_mobile/features/home/view/home_sreen.dart' as nav;
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -39,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
       if (authProvider.isLoggedIn) {
         // ✅ User is logged in → Navigate to Home
-        _navigateToScreen(const HomeScreen());
+        _navigateToScreen(const nav.MainNavigationScreen());
       } else {
         // ⏳ Not logged in → Show "Get Started"
         setState(() => _isAuthChecking = false);

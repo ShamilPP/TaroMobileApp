@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:taro_mobile/core/constants/colors.dart';
-import 'package:taro_mobile/features/home/view/home_sreen.dart';
+import 'package:taro_mobile/features/home/view/home_sreen.dart' as nav;
 import 'package:taro_mobile/features/auth/controller/auth_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -38,7 +38,7 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
       );
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => HomeScreen()),
+        MaterialPageRoute(builder: (_) => nav.MainNavigationScreen()),
             (route) => false,
       );
     } else {

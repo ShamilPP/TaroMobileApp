@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 import 'package:taro_mobile/core/constants/colors.dart';
-import 'package:taro_mobile/features/home/view/home_sreen.dart';
+import 'package:taro_mobile/features/home/view/home_sreen.dart' as nav;
 import 'package:taro_mobile/features/auth/controller/auth_provider.dart';
 import 'package:taro_mobile/features/auth/view/registration_page.dart';
 import 'package:taro_mobile/splash_screen.dart';
@@ -375,7 +375,7 @@ class _VerificationCompleteScreenState extends State<VerificationCompleteScreen>
     } else {
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) => const nav.MainNavigationScreen()),
             (route) => false,
       );
     }
