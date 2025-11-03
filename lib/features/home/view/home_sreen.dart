@@ -7,6 +7,8 @@ import 'package:taro_mobile/features/lead/add_lead_controller.dart';
 import 'package:taro_mobile/features/lead/add_lead_screen.dart';
 import 'package:taro_mobile/core/widgets/bottom_nav_bar.dart';
 import 'package:taro_mobile/features/auth/view/profile_screen.dart';
+import 'package:taro_mobile/features/tasks/view/tasks_screen.dart';
+import 'package:taro_mobile/features/properties/view/properties_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -22,8 +24,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   List<Widget> get _pages => [
     const dashboard.HomeScreen(), // Dashboard/Home
     LeadsListScreen(onProfileTap: _navigateToProfile, onSelectionModeChanged: _onSelectionModeChanged), // Leads
-    const Center(child: Text('Properties\nComing Soon', textAlign: TextAlign.center)), // Properties
-    const Center(child: Text('Tasks\nComing Soon', textAlign: TextAlign.center)), // Tasks
+    const PropertiesScreen(), // Properties
+    const TasksScreen(), // Tasks
     ProfileScreen(), // Profile
   ];
 
