@@ -1,3 +1,5 @@
+// 🌐 API Models — Complete Updated Version
+
 class UserModel {
   final String uid;
   final String? orgId;
@@ -35,9 +37,10 @@ class UserModel {
     required this.publicSlug,
   });
 
+  /// ✅ Parse from API JSON
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      uid: json['uid'] as String,
+      uid: json['uid'] as String? ?? '',
       orgId: json['orgId'] as String?,
       role: json['role'] as String? ?? 'Agent',
       name: json['name'] as String? ?? '',
@@ -49,13 +52,14 @@ class UserModel {
       status: json['status'] as String? ?? 'Active',
       isActive: json['isActive'] as bool? ?? true,
       isDeleted: json['isDeleted'] as bool? ?? false,
-      id: json['_id'] as String,
+      id: json['_id'] as String? ?? '',
       createdAt: json['createdAt'] as String? ?? '',
       updatedAt: json['updatedAt'] as String? ?? '',
       publicSlug: json['publicSlug'] as String? ?? '',
     );
   }
 
+  /// ✅ Convert model → JSON
   Map<String, dynamic> toJson() {
     return {
       'uid': uid,
@@ -76,7 +80,15 @@ class UserModel {
       'publicSlug': publicSlug,
     };
   }
+
+  /// ✅ Easy print in console
+  @override
+  String toString() {
+    return 'UserModel(uid: $uid, name: $name, email: $email, phone: $phoneNumber, role: $role, orgId: $orgId)';
+  }
 }
+
+// ----------------------------------------------------------------------
 
 class OrganizationModel {
   final String id;
@@ -107,9 +119,10 @@ class OrganizationModel {
     required this.updatedAt,
   });
 
+  /// ✅ Parse from API JSON
   factory OrganizationModel.fromJson(Map<String, dynamic> json) {
     return OrganizationModel(
-      id: json['_id'] as String,
+      id: json['_id'] as String? ?? '',
       name: json['name'] as String? ?? '',
       slug: json['slug'] as String? ?? '',
       ownerId: json['ownerId'] as String? ?? '',
@@ -123,7 +136,32 @@ class OrganizationModel {
       updatedAt: json['updatedAt'] as String? ?? '',
     );
   }
+
+  /// ✅ Convert to JSON for logs or caching
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'slug': slug,
+      'ownerId': ownerId,
+      'plan': plan,
+      'status': status,
+      'agentCount': agentCount,
+      'limits': limits,
+      'isActive': isActive,
+      'isDeleted': isDeleted,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'OrganizationModel(name: $name, slug: $slug, plan: $plan, status: $status, agentCount: $agentCount)';
+  }
 }
+
+// ----------------------------------------------------------------------
 
 class OrganizationMemberModel {
   final String id;
@@ -150,7 +188,7 @@ class OrganizationMemberModel {
 
   factory OrganizationMemberModel.fromJson(Map<String, dynamic> json) {
     return OrganizationMemberModel(
-      id: json['_id'] as String,
+      id: json['_id'] as String? ?? '',
       orgId: json['orgId'] as String? ?? '',
       uid: json['uid'] as String? ?? '',
       user: UserModel.fromJson(json['user'] as Map<String, dynamic>),
@@ -161,7 +199,28 @@ class OrganizationMemberModel {
       joinedAt: json['joinedAt'] as String? ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'orgId': orgId,
+      'uid': uid,
+      'user': user.toJson(),
+      'role': role,
+      'status': status,
+      'isActive': isActive,
+      'isDeleted': isDeleted,
+      'joinedAt': joinedAt,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'OrganizationMemberModel(uid: $uid, role: $role, user: ${user.name}, joinedAt: $joinedAt)';
+  }
 }
+
+// ----------------------------------------------------------------------
 
 class OrganizationInviteModel {
   final String id;
@@ -192,7 +251,7 @@ class OrganizationInviteModel {
 
   factory OrganizationInviteModel.fromJson(Map<String, dynamic> json) {
     return OrganizationInviteModel(
-      id: json['_id'] as String,
+      id: json['_id'] as String? ?? '',
       orgId: json['orgId'] as String? ?? '',
       phone: json['phone'] as String? ?? '',
       role: json['role'] as String? ?? 'Agent',
@@ -205,7 +264,30 @@ class OrganizationInviteModel {
       updatedAt: json['updatedAt'] as String? ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'orgId': orgId,
+      'phone': phone,
+      'role': role,
+      'token': token,
+      'expiresAt': expiresAt,
+      'used': used,
+      'isActive': isActive,
+      'isDeleted': isDeleted,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'OrganizationInviteModel(phone: $phone, role: $role, used: $used, expiresAt: $expiresAt)';
+  }
 }
+
+// ----------------------------------------------------------------------
 
 class PaginatedResponse<T> {
   final List<T> data;
@@ -217,18 +299,20 @@ class PaginatedResponse<T> {
   });
 
   factory PaginatedResponse.fromJson(
-    Map<String, dynamic> json,
-    T Function(Map<String, dynamic>) fromJsonT,
-  ) {
+      Map<String, dynamic> json,
+      T Function(Map<String, dynamic>) fromJsonT,
+      ) {
     return PaginatedResponse<T>(
       data: (json['data'] as List<dynamic>?)
-              ?.map((item) => fromJsonT(item as Map<String, dynamic>))
-              .toList() ??
+          ?.map((item) => fromJsonT(item as Map<String, dynamic>))
+          .toList() ??
           [],
       paginator: Paginator.fromJson(json['paginator'] as Map<String, dynamic>),
     );
   }
 }
+
+// ----------------------------------------------------------------------
 
 class Paginator {
   final int itemCount;
@@ -266,5 +350,9 @@ class Paginator {
       next: json['next'] as int?,
     );
   }
-}
 
+  @override
+  String toString() {
+    return 'Paginator(page: $currentPage/$pageCount, items: $itemCount)';
+  }
+}

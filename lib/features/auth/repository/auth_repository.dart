@@ -82,15 +82,28 @@ class AuthRepository {
     try {
       final uri = Uri.parse('${ApiService.baseUrl}/${ApiService.apiVersion}/mobile/auth/verify-phone');
       final headers = {'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': 'Bearer $idToken'};
+      print("📞 [AuthRepository] Sending verifyPhone request...");
+      print("➡️ URL: $uri");
+      print("➡️ Headers: $headers");
 
       final httpResponse = await http.post(uri, headers: headers);
       final responseData = json.decode(httpResponse.body) as Map<String, dynamic>;
-      
+      print("object");
+      print("📥 [AuthRepository] Raw HTTP Response:");
+      print("Status Code: ${httpResponse.statusCode}");
+      print("Body: $responseData");
+
+      print("responseData$responseData");
+      print("httpResponse");
+      print("httpResponse$httpResponse");
+      print("🧾 [AuthRepository] Decoded JSON Response:");
+      print(const JsonEncoder.withIndent('  ').convert(responseData));
+
       if (httpResponse.statusCode >= 200 && httpResponse.statusCode < 300) {
         if (responseData.containsKey('status') && responseData['status'] == true) {
           final data = responseData['data'] as Map<String, dynamic>;
           final userData = data['user'] as Map<String, dynamic>;
-          
+
           // Parse only wanted fields from user object
           final parsedUser = UserModel(
             uid: userData['uid'] as String? ?? '',
@@ -110,16 +123,20 @@ class AuthRepository {
             updatedAt: '', // Not in response
             publicSlug: userData['publicSlug'] as String? ?? '',
           );
-          
+
           return VerifyPhoneResponse(
             success: true,
             user: parsedUser,
             firebaseClaims: data['firebaseClaims'] as Map<String, dynamic>? ?? {},
           );
         } else {
+          print("⚠️ [AuthRepository] Verification failed with status=false");
+
           throw AuthException(message: responseData['message'] as String? ?? 'Failed to verify phone', code: responseData['code'] as String?);
         }
       } else {
+        print("❌ [AuthRepository] HTTP error: ${httpResponse.statusCode}");
+
         throw AuthException(message: responseData['message'] as String? ?? 'Failed to verify phone', code: responseData['code'] as String?);
       }
     } catch (e) {
@@ -127,6 +144,7 @@ class AuthRepository {
         rethrow;
       }
       print('Error verifying phone: $e');
+      print('🔥 [AuthRepository] Error verifying phone: $e');
       throw AuthException(message: 'Network error: ${e.toString()}');
     }
   }

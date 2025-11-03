@@ -2,52 +2,40 @@ import 'package:taro_mobile/core/services/api_service.dart';
 import 'package:taro_mobile/core/models/api_models.dart';
 
 class UserRepository {
-  final ApiService _apiService = ApiService.instance;
+  final ApiService _api = ApiService.instance;
 
   Future<UserModel> getProfile() async {
-    try {
-      final response = await _apiService.get<Map<String, dynamic>>(
-        '/mobile/users/me',
-        requiresAuth: true,
-        parser: (data) => data,
-      );
-
-      if (response.isSuccess && response.data != null) {
-        return UserModel.fromJson(response.data!);
-      } else {
-        throw Exception(response.error ?? 'Failed to fetch profile');
-      }
-    } catch (e) {
-      rethrow;
+    final res = await _api.get<Map<String, dynamic>>(
+      '/mobile/users/me',
+      requiresAuth: true,
+      parser: (data) => data,
+    );
+    if (res.isSuccess && res.data != null) {
+      return UserModel.fromJson(res.data!);
+    } else {
+      throw Exception(res.error ?? 'Failed to fetch profile');
     }
   }
 
   Future<UserModel> updateProfile({
-    String? firstName,
-    String? lastName,
-    String? email,
+    required String firstName,
+    required String lastName,
+    required String email,
   }) async {
-    try {
-      final body = <String, dynamic>{};
-      if (firstName != null) body['firstName'] = firstName;
-      if (lastName != null) body['lastName'] = lastName;
-      if (email != null) body['email'] = email;
-
-      final response = await _apiService.put<Map<String, dynamic>>(
-        '/mobile/users/me',
-        body,
-        requiresAuth: true,
-        parser: (data) => data,
-      );
-
-      if (response.isSuccess && response.data != null) {
-        return UserModel.fromJson(response.data!);
-      } else {
-        throw Exception(response.error ?? 'Failed to update profile');
-      }
-    } catch (e) {
-      rethrow;
+    final res = await _api.put<Map<String, dynamic>>(
+      '/mobile/users/me',
+      {
+        'firstName': firstName,
+        'lastName': lastName,
+        'email': email,
+      },
+      requiresAuth: true,
+      parser: (data) => data,
+    );
+    if (res.isSuccess && res.data != null) {
+      return UserModel.fromJson(res.data!);
+    } else {
+      throw Exception(res.error ?? 'Failed to update profile');
     }
   }
 }
-

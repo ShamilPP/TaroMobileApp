@@ -7,6 +7,7 @@ import 'package:taro_mobile/features/home/view/home_sreen.dart';
 import 'package:taro_mobile/features/auth/controller/auth_provider.dart';
 import 'package:taro_mobile/features/auth/view/registration_page.dart';
 import 'package:taro_mobile/splash_screen.dart';
+import 'package:flutter/material.dart';
 
 class OtpScreen extends StatefulWidget {
   final String phoneNumber;
@@ -32,7 +33,7 @@ class _OtpScreenState extends State<OtpScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -47,11 +48,11 @@ class _OtpScreenState extends State<OtpScreen> {
                 children: [
                   Container(
                     alignment: Alignment.topLeft,
-                    margin: EdgeInsets.only(top: 10.0, left: 0),
+                    margin: const EdgeInsets.only(top: 10.0, left: 0),
                     transform: Matrix4.translationValues(-10.0, 0.0, 0.0),
                     child: NeumorphicButton(
                       onPressed: () => Navigator.pop(context),
-                      style: NeumorphicStyle(
+                      style: const NeumorphicStyle(
                         shape: NeumorphicShape.convex,
                         boxShape: NeumorphicBoxShape.circle(),
                         depth: 4,
@@ -70,19 +71,6 @@ class _OtpScreenState extends State<OtpScreen> {
 
                   SizedBox(height: size.height * 0.05),
 
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
                   Container(
                     height: 100,
                     width: 100,
@@ -94,7 +82,7 @@ class _OtpScreenState extends State<OtpScreen> {
                           color: AppColors.primaryGreen.withOpacity(0.2),
                           blurRadius: 20,
                           spreadRadius: 5,
-                          offset: Offset(0, 5),
+                          offset: const Offset(0, 5),
                         ),
                       ],
                     ),
@@ -109,7 +97,6 @@ class _OtpScreenState extends State<OtpScreen> {
 
                   SizedBox(height: size.height * 0.04),
 
-                  
                   Text(
                     "Verification",
                     style: GoogleFonts.poppins(
@@ -119,9 +106,8 @@ class _OtpScreenState extends State<OtpScreen> {
                     ),
                   ),
 
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
 
-                  
                   Text(
                     "Enter the 6-digit code sent to",
                     textAlign: TextAlign.center,
@@ -132,9 +118,8 @@ class _OtpScreenState extends State<OtpScreen> {
                     ),
                   ),
 
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
 
-                  
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -146,17 +131,16 @@ class _OtpScreenState extends State<OtpScreen> {
                           color: AppColors.primaryGreen,
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
-                        child: Icon(Icons.edit, size: 16, color: Colors.grey),
+                        child: const Icon(Icons.edit, size: 16, color: Colors.grey),
                       ),
                     ],
                   ),
 
                   SizedBox(height: size.height * 0.05),
 
-                  
                   Form(
                     key: formKey,
                     child: Padding(
@@ -179,39 +163,32 @@ class _OtpScreenState extends State<OtpScreen> {
                           selectedColor: AppColors.primaryGreen,
                         ),
                         cursorColor: AppColors.primaryGreen,
-                        animationDuration: Duration(milliseconds: 300),
+                        animationDuration: const Duration(milliseconds: 300),
                         enableActiveFill: true,
                         controller: otpController,
                         keyboardType: TextInputType.number,
-                        boxShadows: [
+                        boxShadows: const [
                           BoxShadow(
                             offset: Offset(0, 2),
                             color: Colors.black12,
                             blurRadius: 10,
                           ),
                         ],
-                        onCompleted: (v) {
-                          
-                          print("Completed: $v");
-                        },
+                        onCompleted: (v) => print("Completed: $v"),
                         onChanged: (value) {
                           setState(() {
                             currentText = value;
                             hasError = false;
                           });
                         },
-                        beforeTextPaste: (text) {
-                          return text != null &&
-                              text.length == 6 &&
-                              int.tryParse(text) != null;
-                        },
+                        beforeTextPaste: (text) =>
+                        text != null && text.length == 6 && int.tryParse(text) != null,
                       ),
                     ),
                   ),
 
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
 
-                  
                   Visibility(
                     visible: hasError,
                     child: Padding(
@@ -227,7 +204,6 @@ class _OtpScreenState extends State<OtpScreen> {
                     ),
                   ),
 
-                  
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -239,37 +215,31 @@ class _OtpScreenState extends State<OtpScreen> {
                         ),
                       ),
                       TextButton(
-                        onPressed:
-                            authProvider.canResend
-                                ? () {
-                                  try {
-                                    authProvider.sendOTP(
-                                      widget.phoneNumber,
-                                      (_, __) {},
-                                      (e) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              "Error resending OTP: ${e.toString()}",
-                                            ),
-                                            backgroundColor:
-                                                Colors.red.shade700,
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text("Error: $e"),
-                                        backgroundColor: Colors.red.shade700,
-                                      ),
-                                    );
-                                  }
-                                }
-                                : null,
+                        onPressed: authProvider.canResend
+                            ? () async {
+                          try {
+                            await authProvider.sendOTP(
+                              widget.phoneNumber,
+                                  (_, __) {},
+                                  (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Error resending OTP: ${e.toString()}"),
+                                    backgroundColor: Colors.red.shade700,
+                                  ),
+                                );
+                              },
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Error: $e"),
+                                backgroundColor: Colors.red.shade700,
+                              ),
+                            );
+                          }
+                        }
+                            : null,
                         child: Text(
                           authProvider.canResend
                               ? "Resend OTP"
@@ -277,10 +247,9 @@ class _OtpScreenState extends State<OtpScreen> {
                           style: GoogleFonts.poppins(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color:
-                                authProvider.canResend
-                                    ? AppColors.primaryGreen
-                                    : Colors.grey,
+                            color: authProvider.canResend
+                                ? AppColors.primaryGreen
+                                : Colors.grey,
                           ),
                         ),
                       ),
@@ -289,92 +258,80 @@ class _OtpScreenState extends State<OtpScreen> {
 
                   SizedBox(height: size.height * 0.06),
 
-                  
                   Container(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed:
-                          authProvider.isLoading
-                              ? null
-                              : () async {
-                                if (formKey.currentState!.validate()) {
-                                  if (currentText.length != 6) {
-                                    setState(() {
-                                      hasError = true;
-                                    });
-                                  } else {
-                                    setState(() {
-                                      hasError = false;
-                                    });
+                      onPressed: authProvider.isLoading
+                          ? null
+                          : () async {
+                        if (formKey.currentState!.validate()) {
+                          if (currentText.length != 6) {
+                            setState(() => hasError = true);
+                          } else {
+                            setState(() => hasError = false);
+                            try {
+                              await authProvider.verifyOTP(currentText);
 
-                                    try {
-                                      await authProvider.verifyOTP(currentText);
-                                      final phoneNumber = widget.phoneNumber;
+                              // ✅ Stop the loading spinner immediately
+                              if (mounted) {
+                                authProvider.setLoading(false);
+                              }
 
-                                      // Wait a moment to ensure user data is fully synced
-                                      await Future.delayed(Duration(milliseconds: 100));
-                                      
-                                      // Check if user needs to complete registration
-                                      // Backend user is already created, but might need profile completion
-                                      if (authProvider.needsRegistration) {
-                                        _navigateToRegistrationScreen(
-                                          phoneNumber,
-                                        );
-                                      } else {
-                                        // Ensure user data is refreshed before navigation
-                                        await authProvider.refreshUserData();
-                                        // Navigate to home screen after successful login
-                                        // Alternative: Use _navigateToSplashScreen() to let splash handle routing
-                                        _navigateToHomeScreen();
-                                      }
-                                    } catch (e) {
-                                      setState(() {
-                                        hasError = true;
-                                      });
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            "Invalid OTP. Please try again.",
-                                          ),
-                                          backgroundColor: Colors.red.shade700,
-                                        ),
-                                      );
-                                    }
-                                  }
-                                }
-                              },
+                              // ✅ Move to success screen
+                              if (mounted) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => VerificationCompleteScreen(
+                                      phoneNumber: widget.phoneNumber,
+                                    ),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (mounted) {
+                                setState(() => hasError = true);
+                                authProvider.setLoading(false);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Invalid OTP. Please try again."),
+                                    backgroundColor: Colors.red.shade700,
+                                  ),
+                                );
+                              }
+                            }
+                          }
+                        }
+                      },
+
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryGreen,
                         foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 18),
+                        padding: const EdgeInsets.symmetric(vertical: 18),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                         elevation: 8,
                         shadowColor: AppColors.primaryGreen.withOpacity(0.5),
                       ),
-                      child:
-                          authProvider.isLoading
-                              ? CircularProgressIndicator(color: Colors.white)
-                              : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "Verify",
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Icon(Icons.arrow_forward_rounded, size: 20),
-                                ],
-                              ),
+                      child: authProvider.isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Verify",
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_forward_rounded, size: 20),
+                        ],
+                      ),
                     ),
                   ),
-
                   SizedBox(height: size.height * 0.04),
                 ],
               ),
@@ -384,35 +341,72 @@ class _OtpScreenState extends State<OtpScreen> {
       ),
     );
   }
+}
 
-  void _navigateToHomeScreen() {
-    // Navigate directly to home screen
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => HomeScreen()),
-      (route) => false,
-    );
+class VerificationCompleteScreen extends StatefulWidget {
+  final String phoneNumber;
+  const VerificationCompleteScreen({super.key, required this.phoneNumber});
+
+  @override
+  State<VerificationCompleteScreen> createState() => _VerificationCompleteScreenState();
+}
+
+class _VerificationCompleteScreenState extends State<VerificationCompleteScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _nextStep();
   }
 
-  // Alternative navigation method - navigate to splash screen which will check auth and route accordingly
-  // To use this instead of _navigateToHomeScreen(), replace the call in the verify OTP handler
-  // ignore: unused_element
-  void _navigateToSplashScreen() {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => SplashScreen()),
-      (route) => false,
-    );
+  Future<void> _nextStep() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    await Future.delayed(const Duration(seconds: 2)); // Short success delay
+    await authProvider.refreshUserData();
+
+    if (authProvider.needsRegistration) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => RegistrationScreen(prefillPhoneNumber: widget.phoneNumber),
+        ),
+            (route) => false,
+      );
+    } else {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+            (route) => false,
+      );
+    }
   }
 
-  void _navigateToRegistrationScreen(String phoneNumber) {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => RegistrationScreen(prefillPhoneNumber: phoneNumber),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.verified_rounded, size: 100, color: AppColors.primaryGreen),
+            const SizedBox(height: 20),
+            Text(
+              "Verification Complete!",
+              style: GoogleFonts.poppins(
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryGreen,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              "Redirecting...",
+              style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey[700]),
+            ),
+          ],
+        ),
       ),
-      (route) => false,
     );
   }
 }

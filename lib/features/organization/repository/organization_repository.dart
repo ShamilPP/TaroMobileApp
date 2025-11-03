@@ -1,234 +1,216 @@
-import 'package:taro_mobile/core/services/api_service.dart';
 import 'package:taro_mobile/core/models/api_models.dart';
+import 'package:taro_mobile/core/services/api_service.dart';
 
 class OrganizationRepository {
-  final ApiService _apiService = ApiService.instance;
+  final ApiService _api = ApiService.instance;
 
-  Future<PaginatedResponse<OrganizationInviteModel>> getMyInvitations({
-    int page = 1,
-    int limit = 10,
-  }) async {
-    try {
-      final response = await _apiService.post<Map<String, dynamic>>(
-        '/mobile/organization/invites/me',
-        {
-          'options': {
-            'page': page,
-            'limit': limit,
-          },
-        },
-        requiresAuth: true,
-        parser: (data) => data,
-      );
+  /// ✅ Get organization details (GET /mobile/organization/{{ORG_SLUG}})
+  Future<OrganizationModel> getOrganization({required String slug}) async {
+    final res = await _api.get<Map<String, dynamic>>(
+      '/mobile/organization/$slug',
+      requiresAuth: true,
+      parser: (data) => data,
+    );
 
-      if (response.isSuccess && response.data != null) {
-        return PaginatedResponse.fromJson(
-          response.data!,
-          (json) => OrganizationInviteModel.fromJson(json),
-        );
-      } else {
-        throw Exception(response.error ?? 'Failed to fetch invitations');
-      }
-    } catch (e) {
-      rethrow;
+    print('ORG RESPONSE: ${res.data}');
+    if (res.isSuccess && res.data != null) {
+      return OrganizationModel.fromJson(res.data!['data']);
+    } else {
+      throw Exception(res.error ?? 'Failed to fetch organization');
     }
   }
 
+  /// ✅ Create new organization (POST /mobile/organization/create)
   Future<OrganizationModel> createOrganization({
     required String name,
     required String address,
-    int maxAgents = 10,
+    required int maxAgents,
   }) async {
-    try {
-      final response = await _apiService.post<Map<String, dynamic>>(
-        '/mobile/organization/create',
-        {
-          'name': name,
-          'address': address,
-          'limits': {
-            'maxAgents': maxAgents,
-          },
-        },
-        requiresAuth: true,
-        parser: (data) => data['org'] as Map<String, dynamic>,
-      );
+    final body = {
+      'name': name,
+      'address': address,
+      'limits': {'maxAgents': maxAgents},
+    };
 
-      if (response.isSuccess && response.data != null) {
-        return OrganizationModel.fromJson(response.data!);
-      } else {
-        throw Exception(response.error ?? 'Failed to create organization');
-      }
-    } catch (e) {
-      rethrow;
+    final res = await _api.post<Map<String, dynamic>>(
+      '/mobile/organization/create',
+      body,
+      requiresAuth: true,
+      parser: (data) => data,
+    );
+
+    print('CREATE ORG RESPONSE: ${res.data}');
+    if (res.isSuccess && res.data != null) {
+      return OrganizationModel.fromJson(res.data!['data']);
+    } else {
+      throw Exception(res.error ?? 'Failed to create organization');
     }
   }
 
-  Future<OrganizationInviteModel> inviteUser({
-    required String orgSlug,
+  /// ✅ Update organization name (PUT /mobile/organization/{{ORG_SLUG}})
+  Future<void> updateOrganization({
+    required String slug,
+    required String newName,
+  }) async {
+    final res = await _api.put<Map<String, dynamic>>(
+      '/mobile/organization/$slug',
+      {'name': newName},
+      requiresAuth: true,
+      parser: (data) => data,
+    );
+
+    print('UPDATE ORG RESPONSE: ${res.data}');
+    if (!res.isSuccess) {
+      throw Exception(res.error ?? 'Failed to update organization');
+    }
+  }
+
+  /// ✅ Get organization members (POST /mobile/organization/{{ORG_SLUG}}/members)
+  Future<List<OrganizationMemberModel>> getMembers({required String slug}) async {
+    final res = await _api.post<Map<String, dynamic>>(
+      '/mobile/organization/$slug/members',
+      {
+        'options': {'page': 1, 'limit': 20}
+      },
+      requiresAuth: true,
+      parser: (data) => data,
+    );
+
+    print('MEMBERS RESPONSE: ${res.data}');
+    if (res.isSuccess && res.data != null) {
+      final members = res.data!['data']['data'] as List<dynamic>;
+      return members.map((e) => OrganizationMemberModel.fromJson(e)).toList();
+    } else {
+      throw Exception(res.error ?? 'Failed to fetch members');
+    }
+  }
+
+  /// ✅ Invite new member (POST /mobile/organization/{{ORG_SLUG}}/invite)
+  Future<void> inviteMember({
+    required String slug,
     required String phone,
   }) async {
-    try {
-      final response = await _apiService.post<Map<String, dynamic>>(
-        '/mobile/organization/$orgSlug/invite',
-        {
-          'phone': phone,
-        },
-        requiresAuth: true,
-        parser: (data) => data['invite'] as Map<String, dynamic>,
-      );
+    final body = {'phone': phone};
 
-      if (response.isSuccess && response.data != null) {
-        return OrganizationInviteModel.fromJson(response.data!);
-      } else {
-        throw Exception(response.error ?? 'Failed to send invitation');
-      }
-    } catch (e) {
-      rethrow;
+    final res = await _api.post<Map<String, dynamic>>(
+      '/mobile/organization/$slug/invite',
+      body,
+      requiresAuth: true,
+      parser: (data) => data,
+    );
+
+    print('INVITE RESPONSE: ${res.data}');
+    if (!res.isSuccess) {
+      throw Exception(res.error ?? 'Failed to invite member');
     }
   }
 
-  Future<PaginatedResponse<OrganizationMemberModel>> getMembers({
-    required String orgSlug,
-    int page = 1,
-    int limit = 10,
-  }) async {
-    try {
-      final response = await _apiService.post<Map<String, dynamic>>(
-        '/mobile/organization/$orgSlug/members',
-        {
-          'options': {
-            'page': page,
-            'limit': limit,
-          },
-        },
-        requiresAuth: true,
-        parser: (data) => data,
-      );
-
-      if (response.isSuccess && response.data != null) {
-        return PaginatedResponse.fromJson(
-          response.data!,
-          (json) => OrganizationMemberModel.fromJson(json),
-        );
-      } else {
-        throw Exception(response.error ?? 'Failed to fetch members');
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<PaginatedResponse<OrganizationInviteModel>> getInvites({
-    required String orgSlug,
-    int page = 1,
-    int limit = 10,
-  }) async {
-    try {
-      final response = await _apiService.post<Map<String, dynamic>>(
-        '/mobile/organization/$orgSlug/invites',
-        {
-          'options': {
-            'page': page,
-            'limit': limit,
-          },
-        },
-        requiresAuth: true,
-        parser: (data) => data,
-      );
-
-      if (response.isSuccess && response.data != null) {
-        return PaginatedResponse.fromJson(
-          response.data!,
-          (json) => OrganizationInviteModel.fromJson(json),
-        );
-      } else {
-        throw Exception(response.error ?? 'Failed to fetch invites');
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<void> removeInvite({
-    required String orgSlug,
-    required String phone,
-  }) async {
-    try {
-      final response = await _apiService.delete<Map<String, dynamic>?>(
-        '/mobile/organization/$orgSlug/invites',
-        {
-          'phone': phone,
-        },
-        requiresAuth: true,
-      );
-
-      if (!response.isSuccess) {
-        throw Exception(response.error ?? 'Failed to remove invite');
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<void> acceptInvite({
-    required String token,
-  }) async {
-    try {
-      final response = await _apiService.post<Map<String, dynamic>?>(
-        '/mobile/organization/accept-invite',
-        {
-          'token': token,
-        },
-        requiresAuth: true,
-      );
-
-      if (!response.isSuccess) {
-        throw Exception(response.error ?? 'Failed to accept invite');
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<void> removeMember({
-    required String orgSlug,
+  /// ✅ Remove team member (DELETE /mobile/organization/{{ORG_SLUG}}/members)
+  Future<void> deleteMember({
+    required String slug,
     required String uid,
   }) async {
-    try {
-      final response = await _apiService.delete<Map<String, dynamic>?>(
-        '/mobile/organization/$orgSlug/members',
-        {
-          'uid': uid,
-        },
-        requiresAuth: true,
-      );
+    final res = await _api.delete<Map<String, dynamic>>(
+      '/mobile/organization/$slug/members',
+      {'uid': uid},
+      requiresAuth: true,
+      parser: (data) => data,
+    );
 
-      if (!response.isSuccess) {
-        throw Exception(response.error ?? 'Failed to remove member');
-      }
-    } catch (e) {
-      rethrow;
+    print('DELETE MEMBER RESPONSE: ${res.data}');
+    if (!res.isSuccess) {
+      throw Exception(res.error ?? 'Failed to delete member');
     }
   }
 
-  Future<OrganizationModel> getOrganization({
-    required String orgSlug,
-  }) async {
-    try {
-      final response = await _apiService.get<Map<String, dynamic>>(
-        '/mobile/organization/$orgSlug',
-        requiresAuth: true,
-        parser: (data) => data,
-      );
+  /// ✅ Get invites list (POST /mobile/organization/{{ORG_SLUG}}/invites)
+  Future<List<OrganizationInviteModel>> getInvites({required String slug}) async {
+    final res = await _api.post<Map<String, dynamic>>(
+      '/mobile/organization/$slug/invites',
+      {
+        'options': {'page': 1, 'limit': 10}
+      },
+      requiresAuth: true,
+      parser: (data) => data,
+    );
 
-      if (response.isSuccess && response.data != null) {
-        return OrganizationModel.fromJson(response.data!);
-      } else {
-        throw Exception(response.error ?? 'Failed to fetch organization');
-      }
-    } catch (e) {
-      rethrow;
+    print('INVITES RESPONSE: ${res.data}');
+    if (res.isSuccess && res.data != null) {
+      final invites = res.data!['data']['data'] as List<dynamic>;
+      return invites.map((e) => OrganizationInviteModel.fromJson(e)).toList();
+    } else {
+      throw Exception(res.error ?? 'Failed to fetch invites');
+    }
+  }
+
+  /// ✅ Delete invite (DELETE /mobile/organization/{{ORG_SLUG}}/invites)
+  Future<void> deleteInvite({
+    required String slug,
+    required String phone,
+  }) async {
+    final res = await _api.delete<Map<String, dynamic>>(
+      '/mobile/organization/$slug/invites',
+      {'phone': phone},
+      requiresAuth: true,
+      parser: (data) => data,
+    );
+
+    print('DELETE INVITE RESPONSE: ${res.data}');
+    if (!res.isSuccess) {
+      throw Exception(res.error ?? 'Failed to delete invite');
+    }
+  }
+
+  /// ✅ Accept team invite (POST /mobile/organization/accept-invite)
+  Future<void> acceptInvite({required String token}) async {
+    final body = {'token': token};
+
+    final res = await _api.post<Map<String, dynamic>>(
+      '/mobile/organization/accept-invite',
+      body,
+      requiresAuth: true,
+      parser: (data) => data,
+    );
+
+    print('ACCEPT INVITE RESPONSE: ${res.data}');
+    if (!res.isSuccess) {
+      throw Exception(res.error ?? 'Failed to accept invite');
+    }
+  }
+
+  /// ✅ Get my invites (POST /mobile/organization/invites/me)
+  Future<List<OrganizationInviteModel>> getMyInvites() async {
+    final res = await _api.post<Map<String, dynamic>>(
+      '/mobile/organization/invites/me',
+      {
+        'options': {'page': 1, 'limit': 10}
+      },
+      requiresAuth: true,
+      parser: (data) => data,
+    );
+
+    print('MY INVITES RESPONSE: ${res.data}');
+    if (res.isSuccess && res.data != null) {
+      final invites = res.data!['data']['data'] as List<dynamic>;
+      return invites.map((e) => OrganizationInviteModel.fromJson(e)).toList();
+    } else {
+      throw Exception(res.error ?? 'Failed to fetch my invites');
+    }
+  }
+
+  /// ✅ Get organization statistics (GET /mobile/organization/{{ORG_SLUG}}/stats)
+  Future<Map<String, dynamic>> getOrganizationStats({required String slug}) async {
+    final res = await _api.get<Map<String, dynamic>>(
+      '/mobile/organization/$slug/stats',
+      requiresAuth: true,
+      parser: (data) => data,
+    );
+
+    print('ORG STATS RESPONSE: ${res.data}');
+    if (res.isSuccess && res.data != null) {
+      return res.data!['data'] as Map<String, dynamic>;
+    } else {
+      throw Exception(res.error ?? 'Failed to fetch organization stats');
     }
   }
 }
-

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+
 import 'package:taro_mobile/core/constants/colors.dart';
 import 'package:taro_mobile/core/constants/image_constants.dart';
-import 'package:taro_mobile/features/home/view/home_sreen.dart';
 import 'package:taro_mobile/features/auth/controller/auth_provider.dart';
-import 'features/auth/view/login_screen.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:taro_mobile/features/auth/view/login_screen.dart';
+import 'package:taro_mobile/features/home/view/home_sreen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> {
@@ -20,55 +21,49 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAuthState();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkAuthState());
   }
 
   Future<void> _checkAuthState() async {
     if (!mounted) return;
 
-    setState(() {
-      _isAuthChecking = true;
-    });
+    setState(() => _isAuthChecking = true);
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     try {
-      if (!authProvider.isInitialized) {
-        await authProvider.initializationCompleter.future;
-      }
+      // Wait for initialization safely
+      await authProvider.ensureInitialized();
 
-      
       if (!mounted) return;
-      
 
-      
       if (authProvider.isLoggedIn) {
-        // User is logged in, navigate to home screen
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => HomeScreen()),
-        );
-        return;
+        // ✅ User is logged in → Navigate to Home
+        _navigateToScreen(const HomeScreen());
+      } else {
+        // ⏳ Not logged in → Show "Get Started"
+        setState(() => _isAuthChecking = false);
       }
-      setState(() {
-        _isAuthChecking = false;
-      });
     } catch (e) {
-      print("Error checking auth state: $e");
-      if (mounted) {
-        setState(() {
-          _isAuthChecking = false;
-        });
-      }
+      debugPrint("❌ Error checking auth state: $e");
+      if (mounted) setState(() => _isAuthChecking = false);
     }
   }
 
-  void _navigateToLogin() {
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (context) => LoginScreen()));
+  void _navigateToScreen(Widget screen) {
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 600),
+        pageBuilder: (_, __, ___) => screen,
+        transitionsBuilder: (_, animation, __, child) => FadeTransition(
+          opacity: animation,
+          child: child,
+        ),
+      ),
+    );
   }
+
+  void _navigateToLogin() => _navigateToScreen( LoginScreen());
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +71,7 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage(AppImages.splash),
             fit: BoxFit.cover,
@@ -86,14 +81,15 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
 
+              /// Logo + App Name
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Image.asset(AppImages.logo, width: 208, height: 208),
                   Transform.translate(
-                    offset: Offset(0, -20), 
+                    offset: const Offset(0, -20),
                     child: Text(
                       'TɅRO',
                       style: GoogleFonts.inter(
@@ -106,33 +102,33 @@ class _SplashScreenState extends State<SplashScreen> {
                 ],
               ),
 
+              /// Loading or “Get Started” button
               Padding(
-                padding: EdgeInsets.only(bottom: 60),
-                child:
-                    _isAuthChecking
-                        ? CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.primaryGreen,
-                          ),
-                        )
-                        : ElevatedButton(
-                          onPressed: _navigateToLogin,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryGreen,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 40,
-                              vertical: 15,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: Text(
-                            'Get Started',
-                            style: TextStyle(fontSize: 18),
-                          ),
-                        ),
+                padding: const EdgeInsets.only(bottom: 60),
+                child: _isAuthChecking
+                    ? const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.primaryGreen,
+                  ),
+                )
+                    : ElevatedButton(
+                  onPressed: _navigateToLogin,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryGreen,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 15,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'Get Started',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
               ),
             ],
           ),
