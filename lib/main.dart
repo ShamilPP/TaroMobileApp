@@ -17,6 +17,8 @@ import 'package:taro_mobile/features/home/controller/lead_controller.dart';
 import 'package:taro_mobile/features/home/view/property_details_screen.dart';
 import 'package:taro_mobile/features/lead/add_lead_controller.dart';
 import 'package:taro_mobile/features/auth/controller/auth_provider.dart';
+import 'package:taro_mobile/features/properties/controller/property_provider.dart';
+import 'package:taro_mobile/features/lead/controller/lead_api_provider.dart';
 import 'package:taro_mobile/features/lead/add_lead_screen.dart';
 import 'package:taro_mobile/features/reminder/notifications/notification_manager.dart';
 import 'package:taro_mobile/features/home/view/lead_details_screen.dart';
@@ -50,6 +52,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => NewLeadProvider()),
         ChangeNotifierProvider(create: (_) => LeadProvider()),
+        ChangeNotifierProvider(create: (_) => PropertyProvider()),
+        ChangeNotifierProvider(create: (_) => LeadApiProvider()),
       ],
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
