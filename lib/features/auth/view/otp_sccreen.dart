@@ -6,7 +6,8 @@ import 'package:taro_mobile/core/constants/colors.dart';
 import 'package:taro_mobile/features/home/view/home_sreen.dart' as nav;
 import 'package:taro_mobile/features/auth/controller/auth_provider.dart';
 import 'package:taro_mobile/features/auth/view/registration_page.dart';
-import 'package:taro_mobile/splash_screen.dart';
+import 'package:taro_mobile/features/auth/view/choose_org_action_screen.dart';
+import 'package:taro_mobile/features/auth/repository/user_repository.dart';
 import 'package:flutter/material.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -352,6 +353,8 @@ class VerificationCompleteScreen extends StatefulWidget {
 }
 
 class _VerificationCompleteScreenState extends State<VerificationCompleteScreen> {
+  final UserRepository _userRepo = UserRepository();
+
   @override
   void initState() {
     super.initState();
@@ -364,20 +367,53 @@ class _VerificationCompleteScreenState extends State<VerificationCompleteScreen>
     await Future.delayed(const Duration(seconds: 2)); // Short success delay
     await authProvider.refreshUserData();
 
+    if (!mounted) return;
+
+    // Check if user needs registration
     if (authProvider.needsRegistration) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
           builder: (_) => RegistrationScreen(prefillPhoneNumber: widget.phoneNumber),
         ),
-            (route) => false,
+        (route) => false,
       );
-    } else {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const nav.MainNavigationScreen()),
-            (route) => false,
-      );
+      return;
+    }
+
+    // User is registered, check if they have an organization
+    try {
+      final userProfile = await _userRepo.getProfile();
+      
+      if (!mounted) return;
+      
+      // Check if user has an organization (using orgId)
+      if (userProfile.orgId != null && userProfile.orgId!.isNotEmpty) {
+        // User has org → Navigate to Home
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const nav.MainNavigationScreen()),
+          (route) => false,
+        );
+      } else {
+        // User registered but no org → Show organization selection
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ChooseOrgActionScreen(phoneNumber: widget.phoneNumber),
+          ),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      // If API call fails, assume user has org and go to home
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const nav.MainNavigationScreen()),
+          (route) => false,
+        );
+      }
     }
   }
 
